@@ -93,15 +93,15 @@ def calc_guesses(low, high):
 
 # Initialise game variables
 mode = "regular"
-rounds_played = 0
+rounds_played = 1
 end_game = "no"
 feedback = ""
 
-game_history = []
-all_scores = []
-
 print("🔼🔼🔼 Welcome to the Higher Lower Game 🔻🔻🔻")
 print()
+
+game_history = []
+all_scores = []
 
 want_instructions = yes_no("Do you want to read the instructions? ")
 
@@ -113,7 +113,7 @@ if want_instructions == "yes":
 num_rounds = int_checker("Rounds <enter for infinite>: ",
                          low=1, exit_code="")
 
-if num_rounds == "infinite":
+if num_rounds == "":
     mode = "infinite"
     num_rounds = 5
 
@@ -194,9 +194,15 @@ if rounds_played > 0:
 
     # Calculate statistics
     all_scores.sort()
-    best_score = all_scores[0]
-    worst_score = all_scores[-1]
-    average_score = sum(all_scores) / len(all_scores)
+    best_score = all_scores
+    worst_score = all_scores
+    average_score = sum(all_scores)
+
+    round_feedback = f"{low_num} vs {high_num}, {feedback}"
+    history_item = f"Round {rounds_played + 1} - {round_feedback}"
+
+    print(round_feedback)
+    game_history.append(history_item)
 
     # Output the statistics
     print("\n📊📊📊 Statistics 📊📊📊")
@@ -204,7 +210,7 @@ if rounds_played > 0:
     print()
 
     # Display the game history on request
-    see_history = yes_no("Do you want to see your game history? ")
+    see_history = yes_no("\nDo you want to see your game history? ")
     if see_history == "yes":
         for item in game_history:
             print(item)
