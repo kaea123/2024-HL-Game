@@ -2,10 +2,11 @@ import math
 import random
 
 
-# checks users enter (y) or no (n)
+# checks users enter yes (y) or no (n)
 def yes_no(question):
     while True:
         response = input(question).lower()
+
         # checks user response, question
         # repeats if users don't enter yes / no
         if response == "yes" or response == "y":
@@ -13,33 +14,33 @@ def yes_no(question):
         elif response == "no" or response == "n":
             return "no"
         else:
-            print("Please enter yes/no")
+            print("Please enter yes / no")
 
 
-def instructions():
+def instruction():
     print('''
 
-**** Instructions **** 
+**** Instructions ****
 
 To begin, choose the number of rounds and either customise 
 the game parameters or go with the default game (where the 
-secret number will be between 1 and 100)
+secret number will be between 1 and 100).
 
-Then choose how many rounds you'd like to play <enter> for
+Then choose how many rounds you'd like to play <enter> for 
 infinite mode.
 
-Your goal is to try guess the secret number without 
+Your goal is to try to guess the secret number without 
 running out of guesses.
 
- Good luck.      
+ Good luck.   
 
-      ''')
+    ''')
 
 
 # checks for an integer with optional upper /
-# low limits and an optional exit code for infinite mode
+# lower limits and an optional exit code for infinite mode
 # / quitting the game
-def int_checker(question, low=None, high=None, exit_code=None):
+def int_check(question, low=None, high=None, exit_code=None):
     # if any integer is allowed...
     if low is None and high is None:
         error = "Please enter an integer"
@@ -50,9 +51,9 @@ def int_checker(question, low=None, high=None, exit_code=None):
         error = (f"Please enter an integer that is "
                  f"more than / equal to {low}")
 
-    # if the number needs to be between low & high
+    # if the number needs to between low & high
     else:
-        error = (f"Please enter an integer that "
+        error = (f"Please enter an integer that"
                  f" is between {low} and {high} (inclusive)")
 
     while True:
@@ -73,8 +74,9 @@ def int_checker(question, low=None, high=None, exit_code=None):
             elif high is not None and response > high:
                 print(error)
 
-            # if response is valid, return it
-            return response
+            # if the response is valid, return it
+            else:
+                return response
 
         except ValueError:
             print(error)
@@ -93,25 +95,25 @@ def calc_guesses(low, high):
 
 # Initialise game variables
 mode = "regular"
-rounds_played = 1
+rounds_played = 0
 end_game = "no"
 feedback = ""
 
-print("🔼🔼🔼 Welcome to the Higher Lower Game 🔻🔻🔻")
-print()
-
 game_history = []
 all_scores = []
+
+print("🔼🔼🔼 Welcome to the Higher Lower Game 🔻🔻🔻")
+print()
 
 want_instructions = yes_no("Do you want to read the instructions? ")
 
 # checks users enter yes (y) or no (n)
 if want_instructions == "yes":
-    instructions()
+    instruction()
 
 # Ask user for number of rounds / infinite mode
-num_rounds = int_checker("Rounds <enter for infinite>: ",
-                         low=1, exit_code="")
+num_rounds = int_check("Rounds <enter for infinite>: ",
+                       low=1, exit_code="")
 
 if num_rounds == "":
     mode = "infinite"
@@ -125,10 +127,10 @@ if default_params == "yes":
 
 # allow user to choose the high / low number
 else:
-    low_num = int_checker("Low Number? ")
-    high_num = int_checker("High Number? ", low=low_num + 1)
+    low_num = int_check("Low Number? ")
+    high_num = int_check("High Number? ", low=low_num + 1)
 
-# calculate the maximum number of guesses based on the low and hugh number
+# calculate the maximum number of guesses based on the low and high number
 guesses_allowed = calc_guesses(low_num, high_num)
 
 # Game loop starts here
@@ -136,7 +138,7 @@ while rounds_played < num_rounds:
 
     # Rounds headings (based on mode)
     if mode == "infinite":
-        rounds_heading = f"\n♾♾♾ Round {rounds_played + 1} (Infinite mode) ♾♾♾"
+        rounds_heading = f"\n♾♾♾ Round {rounds_played + 1} (Infinite Mode) ♾♾♾"
     else:
         rounds_heading = f"\n💿💿💿 Round {rounds_played + 1} of {num_rounds} 💿💿💿"
 
@@ -147,15 +149,14 @@ while rounds_played < num_rounds:
     guesses_used = 0
     already_guessed = []
 
-    # Choose a 'secret' number between the low and hugh number
+    # Choose a 'secret' number between the low and high number
     secret = random.randint(low_num, high_num)
-    print("Spoiler Alert", secret)      # remove this line after testing!
 
     guess = ""
     while guess != secret and guesses_used < guesses_allowed:
 
         # ask the user to guess the number...
-        guess = int_checker("Guess: ", low_num, high_num, "xxx")
+        guess = int_check("Guess: ", low_num, high_num, "xxx")
 
         # check that they don't want to quit
         if guess == "xxx":
@@ -165,14 +166,55 @@ while rounds_played < num_rounds:
 
         # check that guess is not a duplicate
         if guess in already_guessed:
-            print(f"You've already guessed {guess}. You've *still* used "
-                  )
+            print(f"You've already guessed {guess}.  You've *still* used "
+                  f"{guesses_used} / {guesses_allowed} guesses ")
+            continue
+
+        # if guess is not a duplicate, add it to the 'already guessed' list
+        else:
+            already_guessed.append(guess)
+
+        # add one to the number of guesses used
+        guesses_used += 1
+
+        # compare the user's guess with the secret number set up feedback statement
+
+        # If we have guesses left...
+        if guess < secret and guesses_used < guesses_allowed:
+            feedback = (f"Too low, please try a higher number. "
+                        f"You've used {guesses_used} / {guesses_allowed} guesses")
+        elif guess > secret and guesses_used < guesses_allowed:
+            feedback = (f"Too high, please try a lower number. "
+                        f"You've used {guesses_used} / {guesses_allowed} guesses")
+
+        # when the secret number is guessed, we have three different feedback
+        # options (lucky / 'phew' / well done)
+        elif guess == secret:
+
+            if guesses_used == 1:
+                feedback = "🍀🍀 Lucky!  You got it on the first guess. 🍀🍀"
+            elif guesses_used == guesses_allowed:
+                feedback = f"Phew!  You got it in {guesses_used} guesses."
+            else:
+                feedback = f"Well done!  You guessed the secret number in {guesses_used} guesses."
+
+        # if there are no guesses left!
+        else:
+            feedback = "Sorry - you have no more guesses.  You lose this round!"
+            guesses_used = guesses_allowed + 1
+
+        # print feedback to user
+        print(feedback)
+
+        # Additional Feedback (warn user that they are running out of guesses)
+        if guesses_used == guesses_allowed - 1:
+            print("\n💣💣💣 Careful - you have one guess left! 💣💣💣\n")
 
     print()
 
     # Round ends here
 
-    # if user has entered exit code, end game!
+    # if user has entered exit code, end game!!
     if end_game == "yes":
         break
 
@@ -180,6 +222,10 @@ while rounds_played < num_rounds:
 
     # Add round result to game history
     history_feedback = f"Round {rounds_played}: {feedback}"
+    game_history.append(history_feedback)
+
+    # add guesses used to score list
+    all_scores.append(guesses_used)
 
     # if users are in infinite mode, increase number of rounds!
     if mode == "infinite":
@@ -194,29 +240,21 @@ if rounds_played > 0:
 
     # Calculate statistics
     all_scores.sort()
-    best_score = all_scores
-    worst_score = all_scores
-    average_score = sum(all_scores)
-
-    round_feedback = f"{low_num} vs {high_num}, {feedback}"
-    history_item = f"Round {rounds_played + 1} - {round_feedback}"
-
-    print(round_feedback)
-    game_history.append(history_item)
+    best_score = all_scores[0]
+    worst_score = all_scores[-1]
+    average_score = sum(all_scores) / len(all_scores)
 
     # Output the statistics
     print("\n📊📊📊 Statistics 📊📊📊")
-    print(f"Best: {best_score} | Worst:{worst_score} | Average:{average_score:.2f} ")
+    print(f"Best:{best_score} | Worst:{worst_score} | Average:{average_score:.2f} ")
     print()
 
     # Display the game history on request
-    see_history = yes_no("\nDo you want to see your game history? ")
+    see_history = yes_no("Do you want to see your game history? ")
     if see_history == "yes":
         for item in game_history:
             print(item)
 
-    print()
-    print("Thanks for playing.")
-
+# if users have quit without playing a round, end the program gracefully.
 else:
-    print("Oops - you chickened out and did not play any rounds.")
+    print("🐔🐔🐔 Oops - you chickened out and did not play any rounds. 🐔🐔🐔")
